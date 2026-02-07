@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm run demo:01:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}
