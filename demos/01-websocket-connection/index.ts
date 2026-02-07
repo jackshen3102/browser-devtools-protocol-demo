@@ -13,7 +13,10 @@
  * 2. 访问 http://localhost:9222/json 验证连接
  */
 
-import { CDPClient, getTargets, getBrowserVersion } from '../../utils/cdp-client.js';
+import { CDPClient, getTargets, getBrowserVersion, LogLevel } from '../../utils/cdp-client.js';
+import { DEMO_URLS, CHROME_CONFIG } from '../../config.js';
+import { handleDemoError } from '../../utils/error-handler.js';
+import type { BrowserVersion } from '../../types/cdp.js';
 
 async function main() {
   console.log('='.repeat(60));
@@ -21,11 +24,19 @@ async function main() {
   console.log('='.repeat(60));
   console.log();
 
+  const client = new CDPClient({
+    logLevel: LogLevel.INFO,
+    autoReconnect: false,
+  });
+
   try {
     // 步骤 1: 获取浏览器版本信息
     console.log('📋 步骤 1: 获取浏览器版本信息');
     console.log('-'.repeat(60));
-    const version = await getBrowserVersion();
+    const version = await getBrowserVersion(
+      CHROME_CONFIG.defaultHost,
+      CHROME_CONFIG.defaultPort
+    ) as BrowserVersion;
     console.log('浏览器信息:');
     console.log(`  - 产品: ${version.product}`);
     console.log(`  - 版本: ${version['Browser']}`);
@@ -36,7 +47,10 @@ async function main() {
     // 步骤 2: 获取可用的调试目标
     console.log('📋 步骤 2: 获取可用的调试目标（标签页）');
     console.log('-'.repeat(60));
-    const targets = await getTargets();
+    const targets = await getTargets(
+      CHROME_CONFIG.defaultHost,
+      CHROME_CONFIG.defaultPort
+    );
     console.log(`找到 ${targets.length} 个目标:`);
     targets.forEach((target, index) => {
       console.log(`  ${index + 1}. ${target.type}: ${target.title || '(无标题)'}`);
@@ -59,7 +73,6 @@ async function main() {
     console.log();
 
     // 步骤 4: 创建 CDP 客户端并连接
-    const client = new CDPClient();
     await client.connect(pageTarget.webSocketDebuggerUrl);
     console.log();
 
@@ -69,7 +82,7 @@ async function main() {
 
     // 5.1 获取浏览器版本（通过 CDP）
     console.log('命令 1: Browser.getVersion');
-    const browserVersion = await client.send('Browser.getVersion');
+    const browserVersion = await client.send<BrowserVersion>('Browser.getVersion');
     console.log('📥 响应:', JSON.stringify(browserVersion, null, 2));
     console.log();
 
@@ -103,8 +116,8 @@ async function main() {
     // 步骤 7: 导航到一个页面来触发事件
     console.log('📋 步骤 6: 导航到新页面以触发事件');
     console.log('-'.repeat(60));
-    console.log('导航到: https://example.com');
-    await client.send('Page.navigate', { url: 'https://example.com' });
+    console.log(`导航到: ${DEMO_URLS.example}`);
+    await client.send('Page.navigate', { url: DEMO_URLS.example });
 
     // 等待页面加载完成
     console.log('等待页面加载...');
@@ -127,16 +140,10 @@ async function main() {
     console.log('下一步: npm run demo:02 学习 Page Domain');
     console.log();
 
-    // 关闭连接
-    client.close();
-
   } catch (error) {
-    console.error('❌ 错误:', error);
-    console.log();
-    console.log('💡 提示:');
-    console.log('  1. 确保 Chrome 已启动并开启调试端口 9222');
-    console.log('  2. 访问 http://localhost:9222/json 检查连接');
-    console.log('  3. 确保至少打开了一个标签页');
+    handleDemoError(error, 'Demo 01');
+  } finally {
+    client.close();
   }
 }
 

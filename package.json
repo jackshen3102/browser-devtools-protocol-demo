@@ -25,6 +25,22 @@
     "@types/node": "^20.11.24",
     "@types/ws": "^8.5.10",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vitest": "^1.3.0"
+  },
+  "scripts": {
+    "demo:01": "tsx demos/01-websocket-connection/index.ts",
+    "demo:02": "tsx demos/02-page-domain/index.ts",
+    "demo:03": "tsx demos/03-dom-domain/index.ts",
+    "demo:04": "tsx demos/04-network-domain/index.ts",
+    "demo:05": "tsx demos/05-runtime-domain/index.ts",
+    "demo:06": "tsx demos/06-target-domain/index.ts",
+    "demo:07": "tsx demos/07-emulation-domain/index.ts",
+    "demo:08": "tsx demos/08-performance-domain/index.ts",
+    "demo:09": "tsx demos/09-storage-domain/index.ts",
+    "demo:10": "tsx demos/10-debugger-domain/index.ts",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
   }
 }
